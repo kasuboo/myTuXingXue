@@ -9,10 +9,12 @@ int main(void)
 
 	if (!glfwInit()) //初始化glfw库
 		return -1;
-	//利用glfwwindowHint对GLFW进行配置
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+	/*//利用glfwwindowHint对GLFW进行配置
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);*/
+
 	//创建一个窗口,窗口尺寸、名称
 	window = glfwCreateWindow(640, 480, "myPage", NULL, NULL);
 	if (!window) //确定是否创建成功

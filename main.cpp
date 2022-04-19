@@ -2,6 +2,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include<iostream>
+#include<stdlib.h>
 using namespace std;
 int main(void)
 {
@@ -52,6 +53,68 @@ int main(void)
 		glfwSwapBuffers(window); //缓冲区
 		glfwPollEvents(); //处理已经在队列的事件
 	}
+
+	//定义顶点数据
+	float vertices[6] = {
+		-0.5f,-0.5f,0.0f,
+		0.5f,0.5f,-0.5f
+	};
+	//发送数据
+	unsigned int buffer;
+	glGenBuffers(1, &buffer); //创建buffer个数、缓冲区对象id
+	glBindBuffer(GL_ARRAY_BUFFER, buffer); //在缓冲类型下绑定buffer
+	//将顶点数据复制到当前缓冲
+	glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), vertices, GL_STATIC_DRAW);
+
+	//解析数据
+	//配置
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
+	//启用
+	glDisableVertexAttribArray(0);
+
+	//引入着色器
+	//顶点着色器
+	const char* vertexShaderSource = "#version 330 core\n"
+		"layout (location = 0) in vec3 aPos;\n"
+		"void main()\n"
+		"{\n"
+		"   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+		"}\0";
+	//片段着色器
+	const char* fragmentShaderSource =
+		"#version 330 core\n"
+		"out vec3 FragColor;\n"
+		"void main()\n"
+		"{\n"
+		    "FragColor=vec3(0.0f,0.0f,1.0f);\n"
+		"}\n";
+	unsigned int vertexShader; //创建一个顶点着色器对象
+	vertexShader = glCreateShader(GL_VERTEX_SHADER); //返回创建出的着色器id
+	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL); //将顶点着色器赋给对象，并编译
+	glCompileShader(vertexShader); //编译这个对象
+
+	unsigned int fragmentShader; //创建一个片段着色器对象
+	fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+	glCompileShader(fragmentShader);
+	//将着色器对象附加给着色器程序对象
+	unsigned int shaderProgram;
+	shaderProgram = glCreateProgram(); //创建着色器程序对象
+	glAttachShader(shaderProgram, vertexShader);
+	glAttachShader(shaderProgram, fragmentShader);
+	glLinkProgram(shaderProgram); //链接程序
+
+	//激活程序对象
+	while (!glfwWindowShouldClose(window))
+	{
+		glClear(GL_COLOR_BUFFER_BIT); //清空颜色缓冲
+		glUseProgram(shaderProgram); //
+		glDrawArrays(GL_TRIANGLES, 0, 3); //绘制模式、索引数组的起始位置、顶点数量
+		glfwSwapBuffers(window);
+		glfwPollEvents();
+	}
+
+
 	glfwTerminate();
 	return 0;
 

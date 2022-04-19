@@ -12,8 +12,8 @@ int main(void)
 		return -1;
 
 	/*//利用glfwwindowHint对GLFW进行配置
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);*/
 
 	//创建一个窗口,窗口尺寸、名称
@@ -61,8 +61,8 @@ int main(void)
 	};
 	//发送数据
 	unsigned int buffer;
-	glGenBuffers(1, &buffer); //创建buffer个数、缓冲区对象id
-	glBindBuffer(GL_ARRAY_BUFFER, buffer); //在缓冲类型下绑定buffer
+	glGenBuffers(1, &buffer); //创建buffer个数、缓冲区对象id，建立缓冲对象VBO管理内存
+	glBindBuffer(GL_ARRAY_BUFFER, buffer); //在当前缓冲类型下绑定buffer
 	//将顶点数据复制到当前缓冲
 	glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), vertices, GL_STATIC_DRAW);
 
@@ -74,8 +74,9 @@ int main(void)
 
 	//引入着色器
 	//顶点着色器
-	const char* vertexShaderSource = "#version 330 core\n"
-		"layout (location = 0) in vec3 aPos;\n"
+	const char* vertexShaderSource = 
+		"#version 330 core\n"
+		"layout (location = 0) in vec3 aPos;\n" //设定输入对象的位置值
 		"void main()\n"
 		"{\n"
 		"   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
@@ -83,20 +84,21 @@ int main(void)
 	//片段着色器
 	const char* fragmentShaderSource =
 		"#version 330 core\n"
-		"out vec3 FragColor;\n"
+		"out vec4 FragColor;\n"
 		"void main()\n"
 		"{\n"
-		    "FragColor=vec3(0.0f,0.0f,1.0f);\n"
+		    "FragColor=vec4(1.0f,0.5f,0.2f,1.0f);\n" //4个元素的数组：红色、绿色、蓝色和alpha(透明度)分量
 		"}\n";
 	unsigned int vertexShader; //创建一个顶点着色器对象
 	vertexShader = glCreateShader(GL_VERTEX_SHADER); //返回创建出的着色器id
 	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL); //将顶点着色器赋给对象，并编译
 	glCompileShader(vertexShader); //编译这个对象
-
+	
 	unsigned int fragmentShader; //创建一个片段着色器对象
 	fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
 	glCompileShader(fragmentShader);
+
 	//将着色器对象附加给着色器程序对象
 	unsigned int shaderProgram;
 	shaderProgram = glCreateProgram(); //创建着色器程序对象
@@ -112,6 +114,8 @@ int main(void)
 		glDrawArrays(GL_TRIANGLES, 0, 3); //绘制模式、索引数组的起始位置、顶点数量
 		glfwSwapBuffers(window);
 		glfwPollEvents();
+		glDeleteShader(vertexShader);
+		glDeleteShader(fragmentShader);
 	}
 
 

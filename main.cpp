@@ -94,6 +94,7 @@ int main(void)
 		"layout (location = 0) in vec2 aPos;\n" //设定输入对象的位置值
 		"layout (location=1) in vec2 atexCord;\n" //定义纹理属性作为顶点着色器的输入
 		"out vec2 myTexCord;\n"
+		"uniform mat4 transform;\n" //接受一个mat4的uniform变量
 
 		"void main()\n"
 		"{\n"
@@ -113,6 +114,7 @@ int main(void)
 		    //"FragColor=vec4(0.0f,0.0f,1.0f,1.0f);\n" //4个元素的数组：红色、绿色、蓝色和alpha(透明度)分量
 		    "FragColor = texture(ourTexture,myTexCord);\n"
 		"}\n";
+
 	unsigned int vertexShader; //创建一个顶点着色器对象
 	vertexShader = glCreateShader(GL_VERTEX_SHADER); //返回创建出的着色器id
 	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL); //将顶点着色器赋给对象，并编译
@@ -133,6 +135,17 @@ int main(void)
 	//删除着色器对象
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
+
+	//单位矩阵 初始矩阵
+	glm::mat4 trans = gtm::mat4(1.0f);
+	//旋转90度
+	trans = glm::rotate(trans, glm::radius(90.0f), glm::vec3(0.0, 0.0, 1.0));
+	//缩放
+	trans = glm::scale(trans, glm::vec3(2.0, 2.0, 2.0));
+
+	glUseProgram(shaderProgram);
+	unsigned int transformLoc = glGetUniformLocation(shaderProgram, "transform");
+	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 
 	//激活程序对象
 	while (!glfwWindowShouldClose(window))

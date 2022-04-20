@@ -2,12 +2,12 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include<iostream>
-#include<glm.hpp>
-#include<gtc/matrix_transform.hpp>
-#include<gtc/type_ptr.hpp>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+#include <glm.hpp>
+#include <gtc/matrix_transform.hpp>
+#include <gtc/type_ptr.hpp>
 
 using namespace std;
 int main(void)
@@ -47,6 +47,7 @@ int main(void)
 	unsigned int buffer;
 	glGenBuffers(1, &buffer); //创建buffer个数、缓冲区对象id，建立缓冲对象VBO管理内存
 	glBindBuffer(GL_ARRAY_BUFFER, buffer); //在当前缓冲类型下绑定buffer
+	glBindBuffer(GL_ARRAY_BUFFER, buffer);
 	//将顶点数据复制到当前缓冲
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
@@ -74,11 +75,11 @@ int main(void)
 	int width, height, nr;
 	unsigned char* data = stbi_load("test.jpg", &width, &height, &nr, 0);
 	cout << width << " " << height << " " << nr << endl;
-	if (data) 
+	if (data)
 	{
 		//用载入的图片生成一个纹理
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		
+
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 	else
@@ -89,31 +90,34 @@ int main(void)
 
 	//引入着色器
 	//顶点着色器
-	const char* vertexShaderSource =
-		"#version 330 core\n"
-		"layout (location = 0) in vec2 aPos;\n" //设定输入对象的位置值
-		"layout (location=1) in vec2 atexCord;\n" //定义纹理属性作为顶点着色器的输入
-		"out vec2 myTexCord;\n"
-		"uniform mat4 transform;\n" //接受一个mat4的uniform变量
+	const char* vertexShaderSource = "#version 330 core\n" //声明版本，opengl3.3
+		"layout (location = 0) in vec2 aPos;\n"
+		"layout (location = 1) in vec2 atexCord;\n"
+
+		"out vec2 myTexCord;\n"//顶点着色器的输出会直接送到片段着色器，作为片段着色器的输入
+		" uniform mat4 transform;\n"//修改顶点着色器让其接收一个mat4的uniform变量
 
 		"void main()\n"
 		"{\n"
-		"   gl_Position = vec4(aPos.x, aPos.y, 0.0, 1.0);\n"
-		    "myTexCord = atexCord;\n" //直接将顶点着色器的纹理坐标输出
+		"   gl_Position = transform* vec4(aPos.x, aPos.y,0.0, 1.0);\n"//用接收的变换矩阵乘以顶点位置坐标
+		"   myTexCord = atexCord;\n"
+
 		"}\0";
 
 	//片段着色器
-	const char* fragmentShaderSource =
-		"#version 330 core\n"
-		"out vec4 FragColor;\n"
-		"in vec2 myTexCord;\n"
-		"uniform sampler2D ourTexture;\n"
+	const char* fragmentShaderSource =  //片段着色器的源码
+		" #version 330 core\n"
+		" out vec4 FragColor;\n"
 
-		"void main()\n"
-		"{\n"
-		    //"FragColor=vec4(0.0f,0.0f,1.0f,1.0f);\n" //4个元素的数组：红色、绿色、蓝色和alpha(透明度)分量
-		    "FragColor = texture(ourTexture,myTexCord);\n"
-		"}\n";
+		" in vec2 myTexCord;\n"//从顶点着色器接收输入
+
+		" uniform sampler2D ourTexture;\n"//定义一个uniform采样器，把一个纹理添加到片段着色器中，稍后我们会把纹理赋值给这个uniform。
+
+		" void main()\n"
+		" {\n"
+		// "   FragColor = vec4(0.0f, 0.0f, 1.0f, 1.0f);\n"
+		" FragColor =  texture(ourTexture, myTexCord);\n"
+		" }\n";
 
 	unsigned int vertexShader; //创建一个顶点着色器对象
 	vertexShader = glCreateShader(GL_VERTEX_SHADER); //返回创建出的着色器id
@@ -136,18 +140,18 @@ int main(void)
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
 
-	//单位矩阵 初始矩阵
-	glm::mat4 trans = gtm::mat4(1.0f);
-	//旋转90度
-	trans = glm::rotate(trans, glm::radius(90.0f), glm::vec3(0.0, 0.0, 1.0));
-	//缩放
+	//单位矩阵，初始的变换矩阵
+	glm::mat4 trans = glm::mat4(1.0f);
+	//旋转90度（转换成了弧度），绕（0,0,1）即z轴旋转
+	trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
+	//缩放，放大到原来的两倍
 	trans = glm::scale(trans, glm::vec3(2.0, 2.0, 2.0));
 
 	glUseProgram(shaderProgram);
+	//获取uniform变量tansform的地址
 	unsigned int transformLoc = glGetUniformLocation(shaderProgram, "transform");
 	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 
-	//激活程序对象
 	while (!glfwWindowShouldClose(window))
 	{
 		glClear(GL_COLOR_BUFFER_BIT); //清空颜色缓冲
@@ -164,5 +168,3 @@ int main(void)
 	return 0;
 
 }
-
-

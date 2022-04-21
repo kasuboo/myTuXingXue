@@ -102,7 +102,7 @@ int main(void)
     };
 
     //定义顶点数据
-    float vertices1[60] = {
+    float vertices1[] = {
         //矩形
         -1.0f,0.0f,0.0f,0.5f,
         -1.0f,0.5f,0.0f,0.75f,
@@ -190,16 +190,8 @@ int main(void)
     //删除着色器对象
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
-    
-    //矩阵
-    glm::mat4 trans;
-    trans = glm::rotate(trans, 30.0f, glm::vec3(1.0f, 1.0f, 0.0f)); //绕y轴旋转
 
-    glUseProgram(shaderProgram);
-    unsigned int transformLoc = glGetUniformLocation(shaderProgram, "transform");
-    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
-
-   /*------------------------------------------------------------矩形和多边形的-------------------------------------------------------*/ 
+    /*------------------------------------------------------------矩形和多边形的-------------------------------------------------------*/
     unsigned int VBO1, VAO1, EBO1; //创建对象
     glGenBuffers(1, &VBO1);
     glGenVertexArrays(1, &VAO1);
@@ -296,6 +288,14 @@ int main(void)
     {
         glClear(GL_COLOR_BUFFER_BIT); //清空颜色缓冲
         glClearColor(1.0, 1.0, 1.0, 0.0); //设置窗口白色
+
+        //矩阵
+        glm::mat4 trans;
+        trans = glm::rotate(trans, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(1.0f, 1.0f, 1.0f)); //绕y轴旋转
+
+        glUseProgram(shaderProgram);
+        unsigned int transformLoc = glGetUniformLocation(shaderProgram, "transform");
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 
         glUseProgram(shaderProgram); //立方体的
         glBindVertexArray(VAOS);

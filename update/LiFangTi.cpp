@@ -2,6 +2,13 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include<iostream>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+#include <glm.hpp>
+#include <gtc/matrix_transform.hpp>
+#include <gtc/type_ptr.hpp>
+
 using namespace std;
 int main(void)
 {
@@ -116,10 +123,13 @@ int main(void)
     //顶点着色器
     const char* vertexShaderSource =
         "#version 330 core\n"
-        "layout (location = 0) in vec2 aPos;\n" //设定输入对象的位置值
+        "layout (location = 0) in vec3 aPos;\n" //设定输入对象的位置值
+
+        " uniform mat4 transform;\n"//修改顶点着色器让其接收一个mat4的uniform变量
+
         "void main()\n"
         "{\n"
-        "   gl_Position = vec4(aPos.x, aPos.y, 0.0, 1.0);\n"
+        "   gl_Position = transform* vec4(aPos, 1.0);\n"
         "}\0";
 
     //片段着色器
@@ -130,6 +140,7 @@ int main(void)
         "{\n"
         "FragColor=vec4(0.0f,0.0f,1.0f,0.5f);\n" //4个元素的数组：红色、绿色、蓝色和alpha(透明度)分量
         "}\n";
+
     unsigned int vertexShader; //创建一个顶点着色器对象
     vertexShader = glCreateShader(GL_VERTEX_SHADER); //返回创建出的着色器id
     glShaderSource(vertexShader, 1, &vertexShaderSource, NULL); //将顶点着色器赋给对象，并编译
@@ -150,6 +161,14 @@ int main(void)
     //删除着色器对象
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
+    
+    //矩阵
+    glm::mat4 trans;
+    trans = glm::rotate(trans, 30.0f, glm::vec3(1.0f, 1.0f, 0.0f)); //绕y轴旋转
+
+    glUseProgram(shaderProgram);
+    unsigned int transformLoc = glGetUniformLocation(shaderProgram, "transform");
+    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 
     //激活程序对象
     while (!glfwWindowShouldClose(window))

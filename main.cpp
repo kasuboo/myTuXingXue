@@ -9,7 +9,88 @@
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
 
+// 定义摄像机的初始信息
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);		// 位置向量
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);	// 方向向量
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);		// 上向量
+float deltaTime = 0.0f;	// 当前帧与上一帧的时间差
+float lastFrame = 0.0f; // 上一帧的时间
+// 上一次鼠标的位置，默认是屏幕中心
+float lastX = 400;
+float lastY = 300;
+float yaw = -90.0f;
+float pitch = 0.0f;
+float fov = 45.0f;
+bool firstMouse = true;
+
 using namespace std;
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
+    // 每次窗口变化时重新设置图形的绘制窗口，可以理解为画布
+    glViewport(0, 0, width, height);
+}
+void processInput(GLFWwindow* window)
+{
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
+
+    float cameraSpeed = 2.5f * deltaTime; // 相应调整
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        cameraPos += cameraSpeed * cameraFront;
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        cameraPos -= cameraSpeed * cameraFront;
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+}
+
+void cursor_position_callback(GLFWwindow* window, double x, double y)
+{
+    if (firstMouse)
+    {
+        lastX = x;
+        lastY = y;
+        firstMouse = false;
+    }
+
+    float xoffset = x - lastX;
+    float yoffset = lastY - y; 
+    lastX = x;
+    lastY = y;
+
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) //摁动右键移动视角
+    {
+        float sensitivity = 0.5f;
+        xoffset *= sensitivity;
+        yoffset *= sensitivity;
+
+        yaw += xoffset;
+        pitch += yoffset;
+
+        if (pitch > 89.0f)
+            pitch = 89.0f;
+        if (pitch < -89.0f)
+            pitch = -89.0f;
+
+        glm::vec3 front;
+        front.x = cos(glm::radians(pitch)) * cos(glm::radians(yaw));
+        front.y = sin(glm::radians(pitch));
+        front.z = cos(glm::radians(pitch)) * sin(glm::radians(yaw));
+        cameraFront = glm::normalize(front);
+    }
+}
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    if (fov >= 1.0f && fov <= 45.0f)
+        fov -= yoffset;
+    if (fov <= 1.0f)
+        fov = 1.0f;
+    if (fov >= 45.0f)
+        fov = 45.0f;
+}
+
 int main(void)
 {
     GLFWwindow* window; //定义一个窗口
@@ -35,6 +116,10 @@ int main(void)
     else
         cout << "init is ok!";
     cout << glGetString(GL_VERSION);
+
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetCursorPosCallback(window, cursor_position_callback);
+    glfwSetScrollCallback(window, scroll_callback);
 
     glEnable(GL_DEPTH_TEST); //深度测试
     //定义顶点数据
@@ -102,6 +187,7 @@ int main(void)
         33,34,35
     };
 
+    glEnable(GL_DEPTH_TEST); //深度测试
     //定义顶点数据
     float vertices1[] = {
         //矩形
@@ -186,11 +272,14 @@ int main(void)
         "layout (location=3) in vec2 atexCord;\n" //定义纹理属性作为顶点着色器的输入
         "out vec2 myTexCord;\n"
 
-        " uniform mat4 transform;\n"//修改顶点着色器让其接收一个mat4的uniform变量
+        //" uniform mat4 transform;\n"//修改顶点着色器让其接收一个mat4的uniform变量
+        "uniform mat4 model;\n"
+        "uniform mat4 view;\n"
+        "uniform mat4 projection; \n"
 
         "void main()\n"
         "{\n"
-        "   gl_Position = transform* vec4(aPos, 1.0);\n"
+        "   gl_Position = projection * view * model * vec4(aPos, 1.0);\n"
         "   myTexCord = atexCord;\n"    //直接将顶点着色器的纹理坐标输出
         "}\0";
 
@@ -282,10 +371,14 @@ int main(void)
         "layout (location=1) in vec2 atexCord;\n" //定义纹理属性作为顶点着色器的输入
         "out vec2 myTexCord;\n"
 
+        "uniform mat4 model1;\n"
+        "uniform mat4 view;\n"
+        "uniform mat4 projection; \n"
+
         "void main()\n"
         "{\n"
-        "   gl_Position = vec4(aPos.x, aPos.y, 0.0, 1.0);\n"
-        "myTexCord = atexCord;\n" //直接将顶点着色器的纹理坐标输出
+        "   gl_Position = projection * view * model1 * vec4(aPos.x, aPos.y, 0.0, 1.0);\n"
+        "   myTexCord = atexCord;\n"    //直接将顶点着色器的纹理坐标输出
         "}\0";
 
     //片段着色器
@@ -325,16 +418,31 @@ int main(void)
     //激活程序对象
     while (!glfwWindowShouldClose(window))
     {
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;      
+        processInput(window); // 处理输入事件
+
         glClear(GL_COLOR_BUFFER_BIT); //清空颜色缓冲
         glClearColor(1.0, 1.0, 1.0, 0.0); //设置窗口白色
 
-        //矩阵
-        glm::mat4 trans;
-        trans = glm::rotate(trans, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(1.0f, 1.0f, 1.0f)); //绕y轴旋转
+        glm::mat4 view(1.0f);
+        view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);          
+        glm::mat4 projection(1.0f); //投影矩阵
+        projection = glm::perspective(glm::radians(fov), 800.0f / 600.0f, 0.1f, 100.0f);
 
         glUseProgram(shaderProgram);
-        unsigned int transformLoc = glGetUniformLocation(shaderProgram, "transform");
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+        int modelView = glGetUniformLocation(shaderProgram, "view");
+        glUniformMatrix4fv(modelView, 1, GL_FALSE, glm::value_ptr(view));
+        int modelProj = glGetUniformLocation(shaderProgram, "projection");
+        glUniformMatrix4fv(modelProj, 1, GL_FALSE, glm::value_ptr(projection));
+
+        //矩阵
+        glm::mat4 model;
+        model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(1.0f, 1.0f, 1.0f)); //绕y轴旋转
+        glUseProgram(shaderProgram);
+        unsigned int transformLoc = glGetUniformLocation(shaderProgram, "model");
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(model));
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glUseProgram(shaderProgram); //立方体的
@@ -342,6 +450,20 @@ int main(void)
         glDrawElements(GL_TRIANGLES, sizeof(index), GL_UNSIGNED_INT, 0);
         glBindVertexArray(0); //解绑VAO
 
+        /*-----------------------------平面-------------------------------------*/
+        glUseProgram(shaderProgram1);
+        int modelView1 = glGetUniformLocation(shaderProgram1, "view");
+        glUniformMatrix4fv(modelView1, 1, GL_FALSE, glm::value_ptr(view));
+        int modelProj1 = glGetUniformLocation(shaderProgram1, "projection");
+        glUniformMatrix4fv(modelProj1, 1, GL_FALSE, glm::value_ptr(projection));
+        glm::mat4 model1;
+        model1 = glm::rotate(model1, (float)glfwGetTime() * glm::radians(20.0f), glm::vec3(1.0f, 1.0f, 1.0f)); //绕中心轴旋转
+        glUseProgram(shaderProgram1);
+        unsigned int transformLoc1 = glGetUniformLocation(shaderProgram1, "model1");
+        glUniformMatrix4fv(transformLoc1, 1, GL_FALSE, glm::value_ptr(model1));
+        /*-------------------------------------------------------------------------------------------*/
+
+        //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glUseProgram(shaderProgram1); //矩形和多边形的
         glBindTexture(GL_TEXTURE_2D, texture);
         glBindVertexArray(VAO1);

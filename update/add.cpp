@@ -36,50 +36,51 @@ int main(void)
         cout << "init is ok!";
     cout << glGetString(GL_VERSION);
 
+    glEnable(GL_DEPTH_TEST); //深度测试
     //定义顶点数据
     float vertices[] = {
         //正面
-        0.0f,0.0f,-0.5f,
-        0.0f,0.5f,-0.5f,
-        0.5f,0.5f,-0.5f, //第一个
-        0.0f,0.0f,-0.5f,
-        0.5f,0.5f,-0.5f,
-        0.5f,0.0f,-0.5f, //第二个
+        0.0f,0.0f,-0.5f, 0.5f,0.5f,
+        0.0f,0.5f,-0.5f, 0.5f,1.0f,
+        0.5f,0.5f,-0.5f, 1.0f,1.0f,  //第一个
+        0.0f,0.0f,-0.5f, 0.5f,0.5f,
+        0.5f,0.5f,-0.5f, 1.0f,1.0f,
+        0.5f,0.0f,-0.5f, 1.0f,0.5f,  //第二个
         //背面
-        0.0f,0.0f,0.5f,
-        0.0f,0.5f,0.5f,
-        0.5f,0.5f,0.5f, //第一个
-        0.0f,0.0f,0.5f,
-        0.5f,0.5f,0.5f,
-        0.5f,0.0f,0.5f, //第二个
+        0.0f,0.0f,0.5f, 0.5f,0.5f,
+        0.0f,0.5f,0.5f, 0.5f,1.0f,
+        0.5f,0.5f,0.5f, 1.0f,1.0f,  //第一个
+        0.0f,0.0f,0.5f, 0.5f,0.5f,
+        0.5f,0.5f,0.5f, 1.0f,1.0f,
+        0.5f,0.0f,0.5f, 1.0f,0.5f,  //第二个
         //左侧
-        0.0f,0.0f,-0.5f,
-        0.0f,0.5f,-0.5f,
-        0.0f,0.5f,0.5f, //第一个
-        0.0f,0.0f,-0.5f,
-        0.0f,0.5f,0.5f,
-        0.0f,0.0f,0.5f, //第二个
+        0.0f,0.0f,-0.5f, 0.5f,0.5f,
+        0.0f,0.5f,-0.5f, 0.5f,1.0f,
+        0.0f,0.5f,0.5f,  0.5f,1.0f, //第一个
+        0.0f,0.0f,-0.5f, 0.5f,0.5f,
+        0.0f,0.5f,0.5f,  0.5f,1.0f,
+        0.0f,0.0f,0.5f,  0.5f,0.5f, //第二个
         //右侧
-        0.5f,0.0f,-0.5f,
-        0.5f,0.5f,-0.5f,
-        0.5f,0.5f,0.5f, //第一个
-        0.5f,0.0f,-0.5f,
-        0.5f,0.5f,0.5f,
-        0.5f,0.0f,0.5f, //第二个
+        0.5f,0.0f,-0.5f, 1.0f,0.5f,
+        0.5f,0.5f,-0.5f, 1.0f,1.0f,
+        0.5f,0.5f,0.5f,  1.0f,1.0f, //第一个
+        0.5f,0.0f,-0.5f,  1.0f,0.5f,
+        0.5f,0.5f,0.5f,  1.0f,1.0f,
+        0.5f,0.0f,0.5f,  1.0f,0.5f, //第二个
         //上侧
-        0.0f,0.5f,-0.5f,
-        0.0f,0.5f,0.5f,
-        0.5f,0.5f,0.5f, //第一个
-        0.0f,0.5f,-0.5f,
-        0.5f,0.5f,0.5f,
-        0.5f,0.5f,-0.5f, //第二个
+        0.0f,0.5f,-0.5f, 0.5f,1.0f,
+        0.0f,0.5f,0.5f,  0.5f,1.0f,
+        0.5f,0.5f,0.5f,  1.0f,1.0f, //第一个
+        0.0f,0.5f,-0.5f, 0.5f,1.0f,
+        0.5f,0.5f,0.5f,  1.0f,1.0f,
+        0.5f,0.5f,-0.5f, 1.0f,1.0f,  //第二个
         //下侧
-        0.0f,0.0f,-0.5f,
-        0.0f,0.0f,0.5f,
-        0.5f,0.0f,0.5f, //第一个
-        0.0f,0.0f,-0.5f,
-        0.5f,0.0f,0.5f,
-        0.5f,0.0f,-0.5f //第二个
+        0.0f,0.0f,-0.5f, 0.5f,0.5f,
+        0.0f,0.0f,0.5f,  0.5f,0.5f,
+        0.5f,0.0f,0.5f,  1.0f,0.5f, //第一个
+        0.0f,0.0f,-0.5f, 0.5f,0.5f,
+        0.5f,0.0f,0.5f,  1.0f,0.5f,
+        0.5f,0.0f,-0.5f,  1.0f,0.5f  //第二个
     };
     unsigned int index[] = { //索引下标
         0,1,2,
@@ -145,29 +146,65 @@ int main(void)
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(index), index, GL_STATIC_DRAW);
 
     //解析数据    
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0); //配置   
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0); //配置   
     glEnableVertexAttribArray(0); //配置完成,启用
+    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*)(sizeof(float) * 3));
+    glEnableVertexAttribArray(3);
+
+    //创建纹理
+    unsigned int texture1;
+    glGenTextures(1, &texture1);
+    glBindTexture(GL_TEXTURE_2D, texture1); //绑定
+    //为绑定设置纹理形式
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    //翻转图片y轴,使得和opengl方向一致
+    stbi_set_flip_vertically_on_load(true);
+
+    int width1, height1, nr1;
+    unsigned char* data1 = stbi_load("test.jpg", &width1, &height1, &nr1, 0);
+    cout << width1 << " " << height1 << " " << nr1 << endl;
+    if (data1)
+    {
+        //用载入的图片生成一个纹理
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width1, height1, 0, GL_RGB, GL_UNSIGNED_BYTE, data1);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        cout << "fail to load texture" << endl;
+    }
+    stbi_image_free(data1); //释放内存
 
     //引入着色器
     //顶点着色器
     const char* vertexShaderSource =
         "#version 330 core\n"
         "layout (location = 0) in vec3 aPos;\n" //设定输入对象的位置值
+        "layout (location=3) in vec2 atexCord;\n" //定义纹理属性作为顶点着色器的输入
+        "out vec2 myTexCord;\n"
 
         " uniform mat4 transform;\n"//修改顶点着色器让其接收一个mat4的uniform变量
 
         "void main()\n"
         "{\n"
         "   gl_Position = transform* vec4(aPos, 1.0);\n"
+        "   myTexCord = atexCord;\n"    //直接将顶点着色器的纹理坐标输出
         "}\0";
 
     //片段着色器
     const char* fragmentShaderSource =
         "#version 330 core\n"
         "out vec4 FragColor;\n"
+        "in vec2 myTexCord;\n"
+        "uniform sampler2D ourTexture;\n"
+
         "void main()\n"
         "{\n"
-        "FragColor=vec4(0.0f,0.0f,1.0f,0.5f);\n" //4个元素的数组：红色、绿色、蓝色和alpha(透明度)分量
+        //"    FragColor=vec4(0.0f,0.0f,1.0f,0.5f);\n" //4个元素的数组：红色、绿色、蓝色和alpha(透明度)分量
+        "    FragColor = texture(ourTexture,myTexCord);\n"
         "}\n";
 
     unsigned int vertexShader; //创建一个顶点着色器对象
@@ -202,11 +239,13 @@ int main(void)
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices1), vertices1, GL_STATIC_DRAW);//将顶点数据复制到当前缓冲   
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO1); //绑定EBO
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(index1), index1, GL_STATIC_DRAW);
+
     //解析数据    
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, 0); //配置   
     glEnableVertexAttribArray(0); //配置完成,启用
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (void*)(sizeof(float) * 2));
     glEnableVertexAttribArray(1);
+
     //创建纹理
     unsigned int texture;
     glGenTextures(1, &texture);
@@ -297,6 +336,7 @@ int main(void)
         unsigned int transformLoc = glGetUniformLocation(shaderProgram, "transform");
         glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glUseProgram(shaderProgram); //立方体的
         glBindVertexArray(VAOS);
         glDrawElements(GL_TRIANGLES, sizeof(index), GL_UNSIGNED_INT, 0);

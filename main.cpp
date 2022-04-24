@@ -247,7 +247,7 @@ int main(void)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); //纹理过滤
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);  
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     //翻转图片y轴,使得和opengl方向一致
     stbi_set_flip_vertically_on_load(true);
 
@@ -338,15 +338,15 @@ int main(void)
     glEnableVertexAttribArray(1);
 
     //创建纹理
-    unsigned int texture,textures;
+    unsigned int texture, textures;
     glGenTextures(1, &texture);   //生成纹理数量
     glBindTexture(GL_TEXTURE_2D, texture);   //绑定
 
     //为绑定设置纹理形式
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);     
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     int width, height, nr;
     stbi_set_flip_vertically_on_load(true);  //翻转图片y轴,使得和opengl方向一致
@@ -372,9 +372,9 @@ int main(void)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     stbi_set_flip_vertically_on_load(true);
 
-    data = stbi_load("my.jpg", &width, &height, &nr, 0);
+    data = stbi_load("test.jpg", &width, &height, &nr, 0);
     if (data)
-    {      
+    {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data); //用载入的图片生成一个纹理
         glGenerateMipmap(GL_TEXTURE_2D);
     }
@@ -412,7 +412,7 @@ int main(void)
 
         "void main()\n"
         "{\n"
-        "    FragColor = mix(texture(texture, myTexCord), texture(textures, myTexCord), 0.2);\n" //0.2：返回80%的texture1和返回20%的texture2
+        "    FragColor = mix(texture(texture, myTexCord), texture(textures, myTexCord), 0.8);\n" //0.2：返回80%的texture1和返回20%的texture2
         "}\n";
 
     unsigned int vertexShader1; //创建一个顶点着色器对象
@@ -436,11 +436,11 @@ int main(void)
     glDeleteShader(vertexShader1);
     glDeleteShader(fragmentShader1);
     /*------------------------------------------------over------------------------------------------------------*/
-    
+
     glUseProgram(shaderProgram1);
     glUniform1i(glGetUniformLocation(shaderProgram1, "texture"), 0); //设置着色器的纹理单元
     glUniform1i(glGetUniformLocation(shaderProgram1, "textures"), 1);
-    
+
     //激活程序对象
     while (!glfwWindowShouldClose(window))
     {
@@ -490,12 +490,12 @@ int main(void)
         unsigned int transformLoc1 = glGetUniformLocation(shaderProgram1, "model1");
         glUniformMatrix4fv(transformLoc1, 1, GL_FALSE, glm::value_ptr(model1));
         /*-------------------------------------------------------------------------------------------*/
-       
+
         glActiveTexture(GL_TEXTURE0); //矩形和多边形的
         glBindTexture(GL_TEXTURE_2D, texture);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, textures);
-        
+
         glUseProgram(shaderProgram1);
         glBindVertexArray(VAO1);
         glDrawElements(GL_TRIANGLES, 15, GL_UNSIGNED_INT, 0);

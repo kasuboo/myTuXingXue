@@ -8,7 +8,7 @@
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
-
+float mixValue = 0.2f;
 // 定义摄像机的初始信息
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);		// 位置向量
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);	// 方向向量
@@ -24,6 +24,24 @@ float fov = 45.0f;
 bool firstMouse = true;
 
 using namespace std;
+void pressChange(GLFWwindow* window)
+{
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
+
+    if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
+    {
+        mixValue += 0.001f; // change this value accordingly (might be too slow or too fast based on system hardware)
+        if (mixValue >= 1.0f)
+            mixValue = 1.0f;
+    }
+    if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS)
+    {
+        mixValue -= 0.001f; // change this value accordingly (might be too slow or too fast based on system hardware)
+        if (mixValue <= 0.0f)
+            mixValue = 0.0f;
+    }
+}
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     // 每次窗口变化时重新设置图形的绘制窗口，可以理解为画布
@@ -407,12 +425,13 @@ int main(void)
         "#version 330 core\n"
         "out vec4 FragColor;\n"
         "in vec2 myTexCord;\n"
+        "uniform float mixValue;\n"
         "uniform sampler2D texture;\n"
         "uniform sampler2D textures;\n" //纹理单元2
 
         "void main()\n"
         "{\n"
-        "    FragColor = mix(texture(texture, myTexCord), texture(textures, myTexCord), 0.8);\n" //0.2：返回80%的texture1和返回20%的texture2
+        "    FragColor = mix(texture(texture, myTexCord), texture(textures, myTexCord), mixValue);\n" //0.2：返回80%的texture1和返回20%的texture2
         "}\n";
 
     unsigned int vertexShader1; //创建一个顶点着色器对象
@@ -444,6 +463,7 @@ int main(void)
     //激活程序对象
     while (!glfwWindowShouldClose(window))
     {
+        pressChange(window);
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
@@ -495,6 +515,7 @@ int main(void)
         glBindTexture(GL_TEXTURE_2D, texture);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, textures);
+        glUniform1f(glGetUniformLocation(shaderProgram1, "mixValue"), mixValue);
 
         glUseProgram(shaderProgram1);
         glBindVertexArray(VAO1);

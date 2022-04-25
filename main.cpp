@@ -8,7 +8,7 @@
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
-float mixValue = 0.2f;
+float mixValue = 0.0f;
 // 定义摄像机的初始信息
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);		// 位置向量
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);	// 方向向量
@@ -31,13 +31,13 @@ void pressChange(GLFWwindow* window)
 
     if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
     {
-        mixValue += 0.0001f; 
+        mixValue += 0.01f; 
         if (mixValue >= 1.0f)
             mixValue = 1.0f;
     }
     if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS)
     {
-        mixValue -= 0.0001f; 
+        mixValue -= 0.01f; 
         if (mixValue <= 0.0f)
             mixValue = 0.0f;
     }
@@ -57,12 +57,11 @@ void processInput(GLFWwindow* window)
         cameraPos += cameraSpeed * cameraFront;
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
         cameraPos -= cameraSpeed * cameraFront;
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
         cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 }
-
 void cursor_position_callback(GLFWwindow* window, double x, double y)
 {
     if (firstMouse)
@@ -117,7 +116,7 @@ int main(void)
         return -1;
 
     //创建一个窗口,窗口尺寸、名称
-    window = glfwCreateWindow(800, 600, "myPage", NULL, NULL);
+    window = glfwCreateWindow(820, 700, "myPage", NULL, NULL);
     if (!window) //确定是否创建成功
     {
         glfwTerminate(); //终止当前窗口
@@ -142,48 +141,47 @@ int main(void)
     glEnable(GL_DEPTH_TEST); //深度测试
     //定义顶点数据
     float vertices[] = {
-        //正面
-        0.0f,0.0f,-0.5f, 0.5f,0.5f,
-        0.0f,0.5f,-0.5f, 0.5f,1.0f,
-        0.5f,0.5f,-0.5f, 1.0f,1.0f,  //第一个
-        0.0f,0.0f,-0.5f, 0.5f,0.5f,
-        0.5f,0.5f,-0.5f, 1.0f,1.0f,
-        0.5f,0.0f,-0.5f, 1.0f,0.5f,  //第二个
-        //背面
-        0.0f,0.0f,0.5f, 0.5f,0.5f,
-        0.0f,0.5f,0.5f, 0.5f,1.0f,
-        0.5f,0.5f,0.5f, 1.0f,1.0f,  //第一个
-        0.0f,0.0f,0.5f, 0.5f,0.5f,
-        0.5f,0.5f,0.5f, 1.0f,1.0f,
-        0.5f,0.0f,0.5f, 1.0f,0.5f,  //第二个
-        //左侧
-        0.0f,0.0f,-0.5f, 0.5f,0.5f,
-        0.0f,0.5f,-0.5f, 0.5f,1.0f,
-        0.0f,0.5f,0.5f,  0.5f,1.0f, //第一个
-        0.0f,0.0f,-0.5f, 0.5f,0.5f,
-        0.0f,0.5f,0.5f,  0.5f,1.0f,
-        0.0f,0.0f,0.5f,  0.5f,0.5f, //第二个
-        //右侧
-        0.5f,0.0f,-0.5f, 1.0f,0.5f,
-        0.5f,0.5f,-0.5f, 1.0f,1.0f,
-        0.5f,0.5f,0.5f,  1.0f,1.0f, //第一个
-        0.5f,0.0f,-0.5f,  1.0f,0.5f,
-        0.5f,0.5f,0.5f,  1.0f,1.0f,
-        0.5f,0.0f,0.5f,  1.0f,0.5f, //第二个
-        //上侧
-        0.0f,0.5f,-0.5f, 0.5f,1.0f,
-        0.0f,0.5f,0.5f,  0.5f,1.0f,
-        0.5f,0.5f,0.5f,  1.0f,1.0f, //第一个
-        0.0f,0.5f,-0.5f, 0.5f,1.0f,
-        0.5f,0.5f,0.5f,  1.0f,1.0f,
-        0.5f,0.5f,-0.5f, 1.0f,1.0f,  //第二个
-        //下侧
-        0.0f,0.0f,-0.5f, 0.5f,0.5f,
-        0.0f,0.0f,0.5f,  0.5f,0.5f,
-        0.5f,0.0f,0.5f,  1.0f,0.5f, //第一个
-        0.0f,0.0f,-0.5f, 0.5f,0.5f,
-        0.5f,0.0f,0.5f,  1.0f,0.5f,
-        0.5f,0.0f,-0.5f,  1.0f,0.5f  //第二个
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
     };
     unsigned int index[] = { //索引下标
         0,1,2,
@@ -211,10 +209,10 @@ int main(void)
         //矩形
         -1.0f,0.0f, -0.5f,0.5f,
         -1.0f,0.5f, -0.5f,1.0f,
-        -0.5f,0.5f, 0.0f,1.0f, //第一个
+        -0.65f,0.5f, -0.15f,1.0f, //第一个
         -1.0f,0.0f, -0.5f,0.5f,
-        -0.5f,0.5f, 0.0f,1.0f,
-        -0.5f,0.0f, 0.0f,0.5f, //第二个
+        -0.65f,0.5f, -0.5f,1.0f,
+        -0.65f,0.0f, -0.5f,0.5f, //第二个
         //房子
         -0.5f,-0.75f, 0.0f,-0.25f,
         -0.25f,-0.5f, 0.25f,0.0f,
@@ -252,8 +250,8 @@ int main(void)
     //解析数据    
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0); //配置   
     glEnableVertexAttribArray(0); //配置完成,启用
-    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*)(sizeof(float) * 3));
-    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*)(sizeof(float) * 3));
+    glEnableVertexAttribArray(1);
 
     //创建纹理
     unsigned int texture1,texture2;
@@ -262,7 +260,6 @@ int main(void)
     //为绑定设置纹理形式
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); //坐标轴
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); //纹理过滤
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     //翻转图片y轴,使得和opengl方向一致
@@ -287,7 +284,6 @@ int main(void)
     //为绑定设置纹理形式
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); //坐标轴
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); //纹理过滤
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     //翻转图片y轴,使得和opengl方向一致
@@ -311,7 +307,7 @@ int main(void)
     const char* vertexShaderSource =
         "#version 330 core\n"
         "layout (location = 0) in vec3 aPos;\n" //设定输入对象的位置值
-        "layout (location=3) in vec2 atexCord;\n" //定义纹理属性作为顶点着色器的输入
+        "layout (location = 1) in vec2 atexCord;\n" //定义纹理属性作为顶点着色器的输入
         "out vec2 myTexCord;\n"
         "uniform mat4 model;\n"
         "uniform mat4 view;\n"
